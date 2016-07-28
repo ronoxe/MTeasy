@@ -1,0 +1,35 @@
+// calculates u2
+	vector<double> u(vector<double> f,vector<double> p, double k1, double N)
+	{
+		double a = exp(N);
+		double ep = Ep(f,p);
+		vector<double> u2out(2*nF*2*nF);
+		double Hi=H(f,p);
+    
+		vector<double> dVVi;
+		dVVi = pot.dVV(f,p);
+		vector<double> dVi;
+		dVi =  pot.dV(f,p);
+		
+		vector<double> FMi;
+		FMi = fmet.fmetric(f);
+		vector<double> RMi;
+		RMi = fmet.Riemn(f);
+
+		for(int i = 0; i<nF; i++){for(int j = 0; j<nF; j++){
+			double sum1 = 0.0;
+
+			for(int l=0; l<nF; l++)
+			{for(int m=0; m<nF; m++)
+			{
+				sum1=sum1+RMi[(2*nF)*(2*nF)*(2*nF)*(i+nF)+(2*nF)*(2*nF)*(m)+(2*nF)*(j)+(l)]*f[nF+m]*f[nF+l];
+			}
+			}
+            u2out[i+ j*2*nF]=0.;
+            u2out[i+(j+nF)*2*nF]=FMi[(i+nF)*(2*nF)+(j)]*1./Hi /a;//covariant derivative should be swaped around so V^I_{;J}
+            u2out[i+nF+(j)*2*nF]=-FMi[(i+nF)*(2*nF)+(j)]*(k1*k1)/(a*a)/Hi *a + (-dVVi[i + nF*j] + (-3.+ep)*FMi[(i)*(2*nF)+(j)]*f[nF+i]*f[nF+i] + 1./Hi*(-dVi[i])*f[nF+j] + 1./Hi*f[nF+i]*(-dVi[j]) + sum1 )/Hi *a;
+            u2out[i+nF+(j+nF)*2*nF]=-FMi[(i+nF)*(2*nF)+(j)]*2.0/Hi/Hi;
+        }}
+
+		return u2out;
+	}
