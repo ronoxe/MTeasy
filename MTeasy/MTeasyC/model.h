@@ -194,10 +194,24 @@ public:
 
 		
 		double sum1=0;
-		for(int i=0;i<nF;i++){sum1=sum1+f[nF+i]*f[nF+i];}
+		double sum2=0;
+		for(int i=0;i<nF;i++){
+		for(int j=0;j<nF;j++){
+		sum1=sum1+FMi[(2*nF)*(i)+(j)]f[nF+j]*f[nF+i];}}
 		for(int i=0;i<nF;i++){Xi[i] = 2.*(-dVi[i]-3.*Hi*f[nF+i])+f[nF+i]/Hi*sum1;}
 		
 		for(int i=0;i<nF;i++){for(int j=0;j<nF;j++){for(int k=0;k<nF;k++){
+			for(int l=0; l<nF; l++)
+			{for(int m=0; m<nF; m++)
+			{for(int n=0; n<nF; n++)
+			{for(int p=0; p<nF; p++)
+			sum2 = sum2 - 1./3.*f[nF + k](1./2. * RMi[(2*nF)*(2*nF)*(2*nF)*(l+nF)+(2*nF)*(2*nF)*(i+nF)+(2*nF)*(j+nF)+(m+nF)] 
+			+ 1./2. * RMi[(2*nF)*(2*nF)*(2*nF)*(l+nF)+(2*nF)*(2*nF)*(j+nF)+(2*nF)*(i+nF)+(m+nF)] *Fmi[(2*nF)*(m)+(n)]*f[nF+n]*Fmi[(2*nF)*(l)+(p)]*f[nF+p])
+			- 1./3.*f[nF + i](1./2. * RMi[(2*nF)*(2*nF)*(2*nF)*(l+nF)+(2*nF)*(2*nF)*(k+nF)+(2*nF)*(j+nF)+(m+nF)] 
+			+ 1./2. * RMi[(2*nF)*(2*nF)*(2*nF)*(l+nF)+(2*nF)*(2*nF)*(j+nF)+(2*nF)*(k+nF)+(m+nF)] *Fmi[(2*nF)*(m)+(n)]*f[nF+n]*Fmi[(2*nF)*(l)+(p)]*f[nF+p])
+			- 1./3.*f[nF + j](1./2. * RMi[(2*nF)*(2*nF)*(2*nF)*(l+nF)+(2*nF)*(2*nF)*(k+nF)+(2*nF)*(i+nF)+(m+nF)] 
+			+ 1./2. * RMi[(2*nF)*(2*nF)*(2*nF)*(l+nF)+(2*nF)*(2*nF)*(i+nF)+(2*nF)*(k+nF)+(m+nF)] *Fmi[(2*nF)*(m)+(n)]*f[nF+n]*Fmi[(2*nF)*(l)+(p)]*f[nF+p])
+			}}}
 			A[i + j*nF +k* nF*nF] = -1./3. * dVVVi[i + j*nF +k* nF*nF]
 			- 1./3.*f[nF + i]/2./Hi* dVVi[j + k*nF]
             - 1./3.*f[nF + j]/2./Hi* dVVi[i + k*nF]
@@ -211,10 +225,12 @@ public:
 			+ 1.*f[nF + i]*f[nF + j]*f[nF + k]/8./Hi/Hi/Hi*2.*Vi
 			- 1./3.*f[nF + i]/32./Hi/Hi/Hi * Xi[j] * Xi[k] * (k2*k2+k3*k3 - k1*k1)*(k2*k2+k3*k3 - k1*k1)/k2/k2/k3/k3/4.
             - 1./3.*f[nF + j]/32./Hi/Hi/Hi * Xi[i] * Xi[k] * (k1*k1+k3*k3 - k2*k2)*(k1*k1+k3*k3 - k2*k2)/k1/k1/k3/k3/4.
-            - 1./3.*f[nF + k]/32./Hi/Hi/Hi * Xi[i] * Xi[j] * (k1*k1+k2*k2 - k3*k3)*(k1*k1+k2*k2 - k3*k3)/k1/k1/k2/k2/4.;
-    		if(j==k){A[i + j*nF +k* nF*nF] = A[i + j*nF +k* nF*nF] + 1./3.*f[nF+i]/2./Hi*(-k2*k2-k3*k3+k1*k1)/a/a/2.;}
-			if(i==k){A[i + j*nF +k* nF*nF] = A[i + j*nF +k* nF*nF] + 1./3.*f[nF+j]/2./Hi*(-k1*k1-k3*k3+k2*k2)/a/a/2.;}
-			if(i==j){A[i + j*nF +k* nF*nF] = A[i + j*nF +k* nF*nF] + 1./3.*f[nF+k]/2./Hi*(-k2*k2-k1*k1+k3*k3)/a/a/2.;}
+            - 1./3.*f[nF + k]/32./Hi/Hi/Hi * Xi[i] * Xi[j] * (k1*k1+k2*k2 - k3*k3)*(k1*k1+k2*k2 - k3*k3)/k1/k1/k2/k2/4.
+    		+ 1./3.*FMi[(2*nF)*(j+nF)+(k+nF)]*f[nF+i]/2./Hi*(-k2*k2-k3*k3+k1*k1)/a/a/2.
+			+ 1./3.*FMi[(2*nF)*(i+nF)+(k+nF)]*f[nF+j]/2./Hi*(-k1*k1-k3*k3+k2*k2)/a/a/2.
+			+ 1./3.*FMi[(2*nF)*(i+nF)+(j+nF)]*f[nF+k]/2./Hi*(-k2*k2-k1*k1+k3*k3)/a/a/2.
+			+ sum2;
+			sum2=0;
             }}}
 
         return A;
