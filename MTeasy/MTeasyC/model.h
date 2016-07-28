@@ -62,7 +62,7 @@ public:
 		for(int i=0; i<nF; i++)
 		{for(int j=0; j<nF; j++)
 			{
-				sum= sum - 1./2.*(FMi[(2*nF)*(i+nF)+(j+nF)]*f[nF+i]*f[nF+j]);
+				sum= sum - 1./2.*(FMi[(2*nF)*(i)+(j)]*f[nF+i]*f[nF+j]);
 				//if(i==j){sum= sum - 1./2.*(f[nF+i]*f[nF+j]);}
 			}
 		}
@@ -80,7 +80,7 @@ public:
 		for(int i=0; i<nF; i++)
 		{for(int j=0; j<nF; j++)
 			{
-			mdotH= mdotH + 1./2.*(FMi[(2*nF)*(i+nF)+(j+nF)]*f[nF+i]*f[nF+j]);
+			mdotH= mdotH + 1./2.*(FMi[(2*nF)*(i)+(j)]*f[nF+i]*f[nF+j]);
 			//if(i==j){mdotH= mdotH + 1./2.*(f[nF+i]*f[nF+j]);}
 			}
 		}
@@ -121,7 +121,7 @@ public:
 			double sum =0.0;
 			for(int j=0; j<nF; j++)
 			{
-				sum = sum-FMi[(2*nF)*(i+nF)+(j+nF)]*dVi[j]/Hi;
+				sum = sum-dVi[j]/Hi;
 				//if(i==j){u1out[nF+i]  = -3.*Hi*f[nF+i]/Hi-dVi[j]/Hi;}
 			}
 			u1out[nF+i]  = -3.*Hi*f[nF+i]/Hi +sum;
@@ -152,20 +152,20 @@ public:
 		for(int i = 0; i<nF; i++){for(int j = 0; j<nF; j++){
 			for(int l=0; l<nF; l++)
 			{for(int m=0; m<nF; m++)
+			{for(int n=0; n<nF; n++)
+			{for(int p=0; p<nF; p++)
 			{
-				sum1=sum1+RMi[(2*nF)*(2*nF)*(2*nF)*(l+nF)+(2*nF)*(2*nF)*(i+nF)+(2*nF)*(j+nF)+(m+nF)]*f[nF+m]*f[nF+l];
+				sum1=sum1+RMi[(2*nF)*(2*nF)*(2*nF)*(l+nF)+(2*nF)*(2*nF)*(i+nF)+(2*nF)*(j+nF)+(m+nF)]*Fmi[(2*nF)*(m)+(n)]*f[nF+n]*Fmi[(2*nF)*(l)+(p)]*f[nF+p];
+			}
+			}
 			}
 			}
             u2out[i+ j*2*nF]=0.;
-            u2out[i+(j+nF)*2*nF]=0.;
-            u2out[i+nF+(j)*2*nF]=(-dVVi[i + nF*j] + (-3.+ep)*f[nF+i]*f[nF+j] + 1./Hi*(-dVi[i])*f[nF+j] + 1./Hi*f[nF+i]*(-dVi[j]) +sum1)/Hi *a;
-            u2out[i+nF+(j+nF)*2*nF]=0.;
+            u2out[i+(j+nF)*2*nF]=+ Fmi[(2*nF)*(i+nF)+(j+nF)]*1./Hi /a;
+            u2out[i+nF+(j)*2*nF]=(-dVVi[i + nF*j] + (-3.+ep)*f[nF+i]*f[nF+j] + 1./Hi*(-dVi[i])*f[nF+j] + 1./Hi*f[nF+i]*(-dVi[j]) -sum1)/Hi *a - Fmi[(2*nF)*(i+nF)+(j+nF)]*1.0*(k1*k1)/(a*a)/Hi *a;;
+            u2out[i+nF+(j+nF)*2*nF]=- Fmi[(2*nF)*(i+nF)+(j+nF)]*2.0*Hi/Hi;
 			sum1=0.0;
-            if(i==j){
-                      u2out[i+nF+(j)*2*nF]=u2out[i+nF+(j)*2*nF]-1.0*(k1*k1)/(a*a)/Hi *a;
-                      u2out[i+(j+nF)*2*nF]=u2out[i+(j+nF)*2*nF] + 1./Hi /a ;
-                      u2out[i+nF+(j+nF)*2*nF]= u2out[i+nF+(j+nF)*2*nF] - 2.0*Hi/Hi;
-            }
+
         }}
 
 		return u2out;
