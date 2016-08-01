@@ -277,7 +277,7 @@ public:
 			{for(int n=0; n<nF; n++)
 			{for(int p=0; p<nF; p++)
 			{
-			sum2 = 2./9 *( RMi[(2*nF)*(2*nF)*(2*nF)*(i+nF)+(2*nF)*(2*nF)*(j+nF)+(2*nF)*(k+nF)+(l+nF)] +RMi[(2*nF)*(2*nF)*(2*nF)*(i+nF)+(2*nF)*(2*nF)*(k+nF)+(2*nF)*(j+nF)+(l+nF)] 
+			sum2 = sum 2 + 2./9 *( RMi[(2*nF)*(2*nF)*(2*nF)*(i+nF)+(2*nF)*(2*nF)*(j+nF)+(2*nF)*(k+nF)+(l+nF)] +RMi[(2*nF)*(2*nF)*(2*nF)*(i+nF)+(2*nF)*(2*nF)*(k+nF)+(2*nF)*(j+nF)+(l+nF)] 
 			+ RMi[(2*nF)*(2*nF)*(2*nF)*(j+nF)+(2*nF)*(2*nF)*(k+nF)+(2*nF)*(i+nF)+(l+nF)] + RMi[(2*nF)*(2*nF)*(2*nF)*(k+nF)+(2*nF)*(2*nF)*(j+nF)+(2*nF)*(i+nF)+(l+nF)] 
 			+ RMi[(2*nF)*(2*nF)*(2*nF)*(k+nF)+(2*nF)*(2*nF)*(i+nF)+(2*nF)*(j+nF)+(l+nF)] + RMi[(2*nF)*(2*nF)*(2*nF)*(j+nF)+(2*nF)*(2*nF)*(i+nF)+(2*nF)*(k+nF)+(l+nF)] )*Fmi[(2*nF)*(l)+(p)]*f[nF+p])
 			}
@@ -391,22 +391,42 @@ vector<double> N2(vector<double> f, vector<double> p, double k1, double k2, doub
     vector<double> dVi, dVVi;
     vector<double> Nii(2*nF*2*nF);
     double a = exp(N);
-   
+	
+   	vector<double> FMi;
+	FMi = fmet.fmetric(f);
+	vector<double> RMi;
+	RMi = fmet.Riemn(f); 
+	vector<double> CHi;
+	CHi = fmet.Chroff(f);
+	
     dVi=pot.dV(f,p);
     dVVi=pot.dVV(f,p);
     
     double sum3 = 0.0;
-    for(int i=0;i<nF;i++){sum3=sum3+dVi[i]*f[nF+i]/Hin/Hin/Hin;}
+	double sum4 = 0.0;
+	double sum5 = 0.0;
+    for(int i=0;i<nF;i++){
+	for(int j=0;j<nF;j++){
+	sum3=sum3+dVi[i]*Fmi[(2*nF)*(i)+(j)]*f[nF+i]/Hin/Hin/Hin;}}
      
      
     double ep = -Hd/Hin/Hin;
-    for(int i=0;i<nF;i++){for(int j=0; j<nF; j++){
-    Nii[i + (j) * 2*nF]= 2./ep/Hin/Hin/6. * (f[nF+i]*f[nF+j] *(-3./2. + 9./2./ep + 3./4.*sum3/ep/ep));
-    Nii[i + (j+nF) * 2*nF]=2./ep/Hin/Hin/6.*3./2.*f[i+nF]*f[j+nF]/Hin/ep /a;
-    Nii[i+nF + (j) * 2*nF]=2./ep/Hin/Hin/6.*3./2.*f[i+nF]*f[j+nF]/Hin/ep /a;
+    for(int i=0; i<nF; i++){for(int j=0; j<nF; j++){
+	for(int l=0; l<nF; l++){
+		sum5 = sum5 - 1./4. * dVi[l] * CHi[2*nF)*(l)+(nF)*(i+nf)+(j+nF)];
+	for(int m=0; m<nF; m++){
+	for(int n=0; n<nF; n++){
+		sum6 = sum6 + 1./2. * Fmi[(2*nF)*(i+nF)+(m+nF)]*Fmi[(2*nF)*(l)+(n)]*f[nf+n]*CHi[2*nF)*(m)+(nF)*(l+nf)+(j+nF)];
+	for(int p=0; p<nF; p++){
+		sum4 = sum4 - 1./4. * RMi[(2*nF)*(2*nF)*(2*nF)*(l+nF)+(2*nF)*(2*nF)*(i+nF)+(2*nF)*(j+nF)+(m+nF)] * Fmi[(2*nF)*(m)+(n)]*f[nF+n]*Fmi[(2*nF)*(l)+(p)]*f[nF+p];
+	}
+	}
+	}
+	}
+    Nii[i + (j) * 2*nF]= 2./ep/Hin/Hin/6. * (f[nF+i]*f[nF+j] *(-3./2. + 9./2./ep + 3./4.*sum3/ep/ep) +sum4 +sum5 );
+    Nii[i + (j+nF) * 2*nF]=2./ep/Hin/Hin/6.*(3./2.*f[i+nF]*f[j+nF]/Hin/ep +1./2. * sum6 ) /a - Fmi[(2*nF)*(i)+(j)]*2./ep/Hin/Hin/6. * 3./2.*Hin/k1/k1*((-k2*k2-k3*k3+k1*k1)/2. + k2*k2) /a;
+    Nii[i+nF + (j) * 2*nF]=2./ep/Hin/Hin/6.*(3./2.*f[i+nF]*f[j+nF]/Hin/ep +1./2. * sum6 ) /a - Fmi[(2*nF)*(i)+(j)]*2./ep/Hin/Hin/6. * 3./2.*Hin/k1/k1*((-k2*k2-k3*k3+k1*k1)/2. + k3*k3) /a;
     Nii[i+nF + (j+nF) * 2*nF]=0.;
-    if(i==j){Nii[i+nF+(j)*2*nF] = Nii[i+nF + (j) * 2*nF] - 2./ep/Hin/Hin/6. * 3./2.*Hin/k1/k1*((-k2*k2-k3*k3+k1*k1)/2. + k3*k3) /a ;
-    Nii[i+(j+nF)*2*nF] = Nii[i + (j+nF) * 2*nF] - 2./ep/Hin/Hin/6. * 3./2.*Hin/k1/k1*((-k2*k2-k3*k3+k1*k1)/2. + k2*k2) /a;}
     }}
 
     return Nii;
