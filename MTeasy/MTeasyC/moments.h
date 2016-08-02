@@ -2,6 +2,7 @@
 #define back_H 
 #include "model.h"
 #include <iostream>
+#include "fieldmetric.h"
 #include <math.h>
 #include <cmath>
 #include <vector>
@@ -12,7 +13,8 @@ class back
 private:
 	int nF;
 	vector<double> f;
-    
+    fieldmetric fmet;
+
 public:
 	//constructor for background store
 	back(int nFi, vector<double> f )
@@ -72,6 +74,8 @@ public:
 	{
 		nF=nFi;
 		k=k1;
+		vector<double> FMi;
+		FMi = fmet.fmetric(f);
         double Hi;
 		model m;
 		double a = exp(N0);
@@ -81,9 +85,23 @@ public:
     	double ff = 0.5*Hi*Hi/k * 1./((a*Hi)*(a*Hi));
 		double fp = -ff*Hi*a;
 		double pp = ff*k*k/(a*a)*a*a;
-        for(int i = 0; i<nFi; i++){sig[i + 2*nFi*i]=ff;}
-		for(int i = nFi; i<2*nFi; i++){sig[i + 2*nFi*i]=pp;}
-		for(int i = 0; i<nFi; i++){sig[i + 2*nFi*(i+nFi)]=fp; sig[(i+nFi) + 2*nFi*(i)]=fp;}
+		
+        for(int i = 0; i<nFi; i++){
+			for(int j=0; j<nFi;j++){ 
+				sig[i + 2*nFi*j]=FMi[((2*nF)*(i+nF)+j+nF)]*ff;
+			}
+		}
+		for(int i = nFi; i<2*nFi; i++){
+			for(int j=0; j<nFi;j++){ 
+				sig[i + 2*nFi*j]=FMi[((2*nF)*(i+nF)+j+nF)]*pp;
+			}
+		}
+		for(int i = 0; i<nFi; i++){
+			for(int j=0; j<nFi;j++){ 
+				sig[i + 2*nFi*(j+nFi)]=FMi[((2*nF)*(i+nF)+j+nF)]*fp; 
+				sig[(i+nFi) + 2*nFi*(i)]=FMi[((2*nF)*(i+nF)+j+nF)]*fp;
+			}
+		}
     }
     
     //constuctor for sig at horizon crossing (for canonical light field)
@@ -169,6 +187,8 @@ public:
 	sigmaI(int nFi, double k1, double N0, vector<double> f,vector<double> p)
 	{
 		nF=nFi;
+		vector<double> FMi;
+		FMi = fmet.fmetric(f);
 		double Hi;
         k=k1;
 		model m;
@@ -180,9 +200,11 @@ public:
 		double fpI = 0.5*Hi*Hi * 1./(a*Hi)/(a*Hi)/a *a;
 		
         for(int i = 0; i<nF; i++){
-            sigI[i+(nF+i)*2*nF] = +fpI;
-            sigI[i+nF+(i)*2*nF] = -fpI;
-        }
+			for(int j = 0; j<nF; j++){
+				sigI[i+(nF+j)*2*nF] = +FMi[((2*nF)*(i+nF)+j+nF)]*fpI;
+				sigI[i+nF+(j)*2*nF] = -FMi[((2*nF)*(i+nF)+j+nF)]*fpI;
+			}
+        }	
 	}
     
 	//sig asscessors
