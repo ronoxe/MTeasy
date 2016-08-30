@@ -300,6 +300,8 @@ private:
     {
         double  ks, k3s, K2;
         vector<double> C123, C132, C231;
+		vector<double> FMi;
+		FMi = fmet.fmetric(f);
         model m;
         C123 = m.Ccalc(f,p, k1, k2, k3, N0);
         C132 = m.Ccalc(f,p, k1, k3, k2, N0);
@@ -314,10 +316,10 @@ private:
         K2 = k1*k2 + k1*k3 + k2*k3;
         for(int i=0;i<nF;i++){for(int j=0;j<nF;j++){for(int k=0;k<nF;k++){
             fff[i+j*nF+k*nF*nF] = 1./(a*a*a*a)/4. / (k1*k2*k3)/ks*(-C123[i+nF*j+nF*nF*k]*k1*k2
-                                                                   -C132[i+nF*k+nF*nF*j]*k1*k3 - C231[j+nF*k+nF*nF*i]*k2*k3);
-            if(j==k){fff[i+j*nF+k*nF*nF] = fff[i+j*nF+k*nF*nF] + 1./(a*a*a*a)/4./(k1*k2*k3)/ks*f[nF+i]/2./Hi*(-k2*k2-k3*k3+k1*k1)/2.;}
-            if(i==k){fff[i+j*nF+k*nF*nF] = fff[i+j*nF+k*nF*nF] + 1./(a*a*a*a)/4./(k1*k2*k3)/ks*f[nF+j]/2./Hi*(-k1*k1-k3*k3+k2*k2)/2.;}
-            if(i==j){fff[i+j*nF+k*nF*nF] = fff[i+j*nF+k*nF*nF] + 1./(a*a*a*a)/4./(k1*k2*k3)/ks*f[nF+k]/2./Hi*(-k1*k1-k2*k2+k3*k3)/2.;}
+                                                                   -C132[i+nF*k+nF*nF*j]*k1*k3 - C231[j+nF*k+nF*nF*i]*k2*k3) 
+             + FMi[((2*nF)*(j+nF)+k+nF)]*1./(a*a*a*a)/4./(k1*k2*k3)/ks*f[nF+i]/2./Hi*(-k2*k2-k3*k3+k1*k1)/2.
+             + FMi[((2*nF)*(i+nF)+k+nF)]*1./(a*a*a*a)/4./(k1*k2*k3)/ks*f[nF+j]/2./Hi*(-k1*k1-k3*k3+k2*k2)/2.
+             + FMi[((2*nF)*(i+nF)+j+nF)]*1./(a*a*a*a)/4./(k1*k2*k3)/ks*f[nF+k]/2./Hi*(-k1*k1-k2*k2+k3*k3)/2.;}
         }}}
         return fff;
     }
@@ -327,7 +329,9 @@ private:
         double a, Hi, ks, k3s, K2;
         vector<double> pff(nF*nF*nF);
         vector<double> C123, C132, C231,B123, B132, B231;
-        
+        vector<double> FMi;
+		FMi = fmet.fmetric(f);
+		
         model m;
         
         C123 = m.Ccalc(f, p, k1, k2, k3, N0);
@@ -349,10 +353,10 @@ private:
         for(int i=0;i<nF;i++){for(int j=0;j<nF;j++){for(int k=0;k<nF;k++){
             pff[i+j*nF+k*nF*nF] = - 1./(a*a*a)/4./k3s * Hi * (-k1*k1*(k2+k3)/ks* k1*k2*k3) * (-C123[i+nF*j+nF*nF*k]*k1*k2
                                                                                               -C132[i+nF*k+nF*nF*j]*k1*k3
-                                                                                              -C231[j+nF*k+nF*nF*i]*k2*k3);
-            if(j==k){pff[i+j*nF+k*nF*nF] = pff[i+j*nF+k*nF*nF] - 1./(a*a*a)/4./k3s * Hi * (-k1*k1*(k2+k3)/ks* k1*k2*k3) * f[nF+i]/2./Hi*(-k2*k2-k3*k3+k1*k1)/2.;}
-            if(i==k){pff[i+j*nF+k*nF*nF] = pff[i+j*nF+k*nF*nF] - 1./(a*a*a)/4./k3s * Hi * (-k1*k1*(k2+k3)/ks* k1*k2*k3) * f[nF+j]/2./Hi*(-k1*k1-k3*k3+k2*k2)/2.;}
-            if(i==j){pff[i+j*nF+k*nF*nF] = pff[i+j*nF+k*nF*nF] - 1./(a*a*a)/4./k3s * Hi * (-k1*k1*(k2+k3)/ks* k1*k2*k3) * f[nF+k]/2./Hi*(-k1*k1-k2*k2+k3*k3)/2.;}
+                                                                                              -C231[j+nF*k+nF*nF*i]*k2*k3)
+			- FMi[((2*nF)*(j+nF)+k+nF)]*1./(a*a*a)/4./k3s * Hi * (-k1*k1*(k2+k3)/ks* k1*k2*k3) * f[nF+i]/2./Hi*(-k2*k2-k3*k3+k1*k1)/2.
+            - FMi[((2*nF)*(i+nF)+k+nF)]*1./(a*a*a)/4./k3s * Hi * (-k1*k1*(k2+k3)/ks* k1*k2*k3) * f[nF+j]/2./Hi*(-k1*k1-k3*k3+k2*k2)/2.
+            - FMi[((2*nF)*(i+nF)+j+nF)]*1./(a*a*a)/4./k3s * Hi * (-k1*k1*(k2+k3)/ks* k1*k2*k3) * f[nF+k]/2./Hi*(-k1*k1-k2*k2+k3*k3)/2.;}
             
         }}}
         for(int i=0;i<nF;i++){for(int j=0;j<nF;j++){for(int k=0;k<nF;k++){
@@ -361,10 +365,10 @@ private:
                                                                                                       + C231[j+k*nF+i*nF*nF]*k3*k3*k2*k2*(1.+k1/ks));
             pff[i+j*nF+k*nF*nF] = pff[i+j*nF+k*nF*nF] - 1./(a*a*a)/4./k3s * Hi * (-k1*k1*k2*k3/ks) * (B123[i+j*nF+k*nF*nF]/Hi*k1*k2*k3*k3
                                                                                                       + B132[i+k*nF+j*nF*nF]/Hi*k1*k3*k2*k2
-                                                                                                      + B231[j+k*nF+i*nF*nF]/Hi*k2*k3*k1*k1);
-            if(j==k){pff[i+j*nF+k*nF*nF] = pff[i+j*nF+k*nF*nF] - 1./(a*a*a)/4./k3s * Hi * (-k1*k1*k2*k3/ks) * f[nF+i]/2./Hi*(-1.)*(-k2*k2-k3*k3+k1*k1)/2.*(K2 +k1*k2*k3/ks);}
-            if(i==k){pff[i+j*nF+k*nF*nF] = pff[i+j*nF+k*nF*nF] - 1./(a*a*a)/4./k3s * Hi * (-k1*k1*k2*k3/ks) * f[nF+j]/2./Hi*(-1.)*(-k1*k1-k3*k3+k2*k2)/2.*(K2 +k1*k2*k3/ks);}
-            if(i==j){pff[i+j*nF+k*nF*nF] = pff[i+j*nF+k*nF*nF] - 1./(a*a*a)/4./k3s * Hi * (-k1*k1*k2*k3/ks) * f[nF+k]/2./Hi*(-1.)*(-k1*k1-k2*k2+k3*k3)/2.*(K2 +k1*k2*k3/ks);}
+                                                                                                      + B231[j+k*nF+i*nF*nF]/Hi*k2*k3*k1*k1)
+			- FMi[((2*nF)*(j+nF)+k+nF)]*1./(a*a*a)/4./k3s * Hi * (-k1*k1*k2*k3/ks) * f[nF+i]/2./Hi*(-1.)*(-k2*k2-k3*k3+k1*k1)/2.*(K2 +k1*k2*k3/ks)
+            - FMi[((2*nF)*(i+nF)+k+nF)]*1./(a*a*a)/4./k3s * Hi * (-k1*k1*k2*k3/ks) * f[nF+j]/2./Hi*(-1.)*(-k1*k1-k3*k3+k2*k2)/2.*(K2 +k1*k2*k3/ks)
+            - FMi[((2*nF)*(i+nF)+j+nF)]*1./(a*a*a)/4./k3s * Hi * (-k1*k1*k2*k3/ks) * f[nF+k]/2./Hi*(-1.)*(-k1*k1-k2*k2+k3*k3)/2.*(K2 +k1*k2*k3/ks);}
         }}}
         return pff;
     }
@@ -393,10 +397,10 @@ private:
         for(int i=0;i<nF;i++){for(int j=0;j<nF;j++){for(int k=0;k<nF;k++){
             ppf[i+j*nF+k*nF*nF] = -1./(a*a*a*a)/4./k3s * (k1*k2*k3)*(k1*k2*k3)/ks*k1*k2*(-C123[i+j*nF+k*nF*nF]*k1*k2
                                                                                          -C132[i+k*nF+j*nF*nF]*k1*k3
-                                                                                         -C231[j+k*nF+i*nF*nF]*k2*k3);
-            if(j==k){ppf[i+j*nF+k*nF*nF] = ppf[i+j*nF+k*nF*nF]   - 1./(a*a*a*a)/4/k3s * (k1*k2*k3)*(k1*k2*k3)/ks*k1*k2*f[nF+i]/2./H*(-k2*k2-k3*k3+k1*k1)/2.;}
-            if(i==k){ppf[i+j*nF+k*nF*nF] = ppf[i+j*nF+k*nF*nF]   - 1./(a*a*a*a)/4/k3s * (k1*k2*k3)*(k1*k2*k3)/ks*k1*k2*f[nF+j]/2./H*(-k1*k1-k3*k3+k2*k2)/2.;}
-            if(i==j){ppf[i+j*nF+k*nF*nF] = ppf[i+j*nF+k*nF*nF]    -1./(a*a*a*a)/4/k3s * (k1*k2*k3)*(k1*k2*k3)/ks*k1*k2*f[nF+k]/2./H*(-k1*k1-k2*k2+k3*k3)/2.;}
+                                                                                         -C231[j+k*nF+i*nF*nF]*k2*k3)
+            - FMi[((2*nF)*(j+nF)+k+nF)]*1./(a*a*a*a)/4/k3s * (k1*k2*k3)*(k1*k2*k3)/ks*k1*k2*f[nF+i]/2./H*(-k2*k2-k3*k3+k1*k1)/2.
+            - FMi[((2*nF)*(i+nF)+k+nF)]*1./(a*a*a*a)/4/k3s * (k1*k2*k3)*(k1*k2*k3)/ks*k1*k2*f[nF+j]/2./H*(-k1*k1-k3*k3+k2*k2)/2.
+            - FMi[((2*nF)*(i+nF)+j+nF)]*1./(a*a*a*a)/4/k3s * (k1*k2*k3)*(k1*k2*k3)/ks*k1*k2*f[nF+k]/2./H*(-k1*k1-k2*k2+k3*k3)/2.;}
             
         }}}
         return ppf;
@@ -431,10 +435,10 @@ private:
                                                                                        + C231[j+k*nF+i*nF*nF ]*k3*k3*k2*k2*(1.+k1/ks));
             ppp[i+j*nF+k*nF*nF ] = ppp[i+j*nF+k*nF*nF] - 1./(a*a*a)/4./k3s * H * (k1*k1*k2*k2*k3*k3)/ks * (B123[i+j*nF+k*nF*nF]/H*k1*k2*k3*k3
                                                                                                            + B132[i+k*nF+j*nF*nF]/H*k1*k3*k2*k2
-                                                                                                           + B231[j+k*nF+i*nF*nF]/H*k2*k3*k1*k1);
-            if(j==k){ppp[i+j*nF+k*nF*nF] = ppp[i+j*nF+k*nF*nF] - 1./(a*a*a)/4./k3s * H * (k1*k1*k2*k2*k3*k3)/ks * f[nF+i]/2./H*(-1.)*(-k2*k2-k3*k3+k1*k1)/2.*(K2 +k1*k2*k3/ks);}
-            if(i==k){ppp[i+j*nF+k*nF*nF] = ppp[i+j*nF+k*nF*nF] - 1./(a*a*a)/4./k3s * H * (k1*k1*k2*k2*k3*k3)/ks * f[nF+j]/2./H*(-1.)*(-k1*k1-k3*k3+k2*k2)/2.*(K2 +k1*k2*k3/ks);}
-            if(i==j){ppp[i+j*nF+k*nF*nF] = ppp[i+j*nF+k*nF*nF] - 1./(a*a*a)/4./k3s * H * (k1*k1*k2*k2*k3*k3)/ks * f[nF+k]/2./H*(-1.)*(-k1*k1-k2*k2+k3*k3)/2.*(K2 +k1*k2*k3/ks);}
+                                                                                                           + B231[j+k*nF+i*nF*nF]/H*k2*k3*k1*k1)
+            - FMi[((2*nF)*(j+nF)+k+nF)]*1./(a*a*a)/4./k3s * H * (k1*k1*k2*k2*k3*k3)/ks * f[nF+i]/2./H*(-1.)*(-k2*k2-k3*k3+k1*k1)/2.*(K2 +k1*k2*k3/ks)
+            - FMi[((2*nF)*(i+nF)+k+nF)]*1./(a*a*a)/4./k3s * H * (k1*k1*k2*k2*k3*k3)/ks * f[nF+j]/2./H*(-1.)*(-k1*k1-k3*k3+k2*k2)/2.*(K2 +k1*k2*k3/ks)
+            - FMi[((2*nF)*(i+nF)+j+nF)]*1./(a*a*a)/4./k3s * H * (k1*k1*k2*k2*k3*k3)/ks * f[nF+k]/2./H*(-1.)*(-k1*k1-k2*k2+k3*k3)/2.*(K2 +k1*k2*k3/ks);}
             
         }}}
         return ppp;
